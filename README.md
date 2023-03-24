@@ -1,4 +1,4 @@
-# Docker image build scripts for dev certificated for Temporal Cloud
+# Docker image build scripts for dev certificates for Temporal Cloud
 
 ## setup builder first time
 ```
