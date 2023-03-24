@@ -1,0 +1,5 @@
+.envrc*
+**/mycerts
+.DS_Store
+mycerts/
+*.swp
