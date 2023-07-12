@@ -22,12 +22,15 @@ cat << EOF > ${GENERATED_END_ENTITY_CONF_FILE}
 [req]
 default_bits = 4096
 default_md = sha256
-req_extensions = req_ext
+req_extensions = v3_req
 distinguished_name = dn
 prompt = no
 
-[req_ext]
+[v3_req]
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyEncipherment
 subjectAltName = @alt_names
+nsComment = "client.id.$RANDLETTER"
 
 [dn]
 O = $CN
@@ -35,15 +38,16 @@ CN = $CN client
 
 [alt_names]
 DNS.1 = $DNS_END_ENTITY
+DNS.2 = client.id.$RANDLETTER
 EOF
 
 # Generate client's private key and certificate signing request (CSR)
-openssl req -newkey rsa:4096 -nodes -keyout "/work/${UNIQUE_NAME}.key" -out "/work/${UNIQUE_NAME}-req.pem" -config "/work/${UNIQUE_NAME}.conf"
+openssl req -newkey rsa:4096 -nodes -keyout "/work/${UNIQUE_NAME}.key" -out "/work/${UNIQUE_NAME}-req.pem" -extensions v3_req -config "/work/${UNIQUE_NAME}.conf"
 
 echo "Signing certificate"
 
 # Use CA's private key to sign client's CSR and get back the signed certificate
-openssl x509 -days 365 -req -in "/work/${UNIQUE_NAME}-req.pem" -CA "/work/ca.pem" -CAkey "/work/ca.key" -CAcreateserial -out "/work/${UNIQUE_NAME}.pem" -extfile "/work/${UNIQUE_NAME}.conf"
+openssl x509 -days 365 -req -in "/work/${UNIQUE_NAME}-req.pem" -CA "/work/ca.pem" -CAkey "/work/ca.key" -CAcreateserial -out "/work/${UNIQUE_NAME}.pem" -extensions v3_req -extfile "/work/${UNIQUE_NAME}.conf"
 
 # Delete the certificate signing request after the certificate has been signed.
 rm "/work/${UNIQUE_NAME}-req.pem"
